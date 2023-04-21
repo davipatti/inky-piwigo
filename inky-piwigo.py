@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     fname = download_url(random.choice(urls))
 
-    img = Image.open(fname).resize(600, 400)
+    img = Image.open(fname).resize((600, 400))
     display = Inky7Colour()
     display.set_image(img)
     display.show()
