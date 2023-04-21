@@ -7,8 +7,8 @@ import random
 import urllib
 from pathlib import Path
 
-# from PIL import Image
-# from inky import Inky7Colour
+from PIL import Image
+from inky import Inky7Colour
 
 
 class PiwigoSession:
