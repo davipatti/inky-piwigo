@@ -68,14 +68,30 @@ if __name__ == "__main__":
     parser.add_argument("--username", required=True)
     parser.add_argument("--password", required=True)
     parser.add_argument("--tag", required=True)
+    parser.add_argument(
+        "--size",
+        required=False,
+        choices=[
+            "square",
+            "thumb",
+            "xsmall",
+            "small",
+            "medium",
+            "large",
+            "xlarge",
+            "xxlarge",
+            "2small",
+        ],
+        default="medium",
+    )
     args = parser.parse_args()
 
     session = PiwigoSession(args.username, args.password)
-    urls = session.tagUrls(args.tag, size="xsmall")
+    urls = session.tagUrls(args.tag, size=args.size)
 
     fname = download_url(random.choice(urls))
 
-    img = Image.open(fname)
+    img = Image.open(fname).resize(600, 400)
     display = Inky7Colour()
     display.set_image(img)
     display.show()
