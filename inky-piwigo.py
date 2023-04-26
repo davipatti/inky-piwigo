@@ -9,8 +9,8 @@ import requests
 import argparse
 import random
 import urllib
-import PIL as pil
 from pathlib import Path
+from PIL import Image, ImageOps, ImageShow
 
 IMG_SIZES = (
     "square",
@@ -128,11 +128,11 @@ if __name__ == "__main__":
 
     fname = download_url(random.choice(urls))
 
-    img = pil.Image.open(fname)
-    padded = pil.ImageOps.pad(img, (600, 448))
+    img = Image.open(fname)
+    padded = ImageOps.pad(img, (600, 448))
 
     if args.preview:
-        pil.ImageShow.show(padded)
+        ImageShow.show(padded)
 
     else:
         from inky import Inky7Colour
