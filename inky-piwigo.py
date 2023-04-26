@@ -9,10 +9,8 @@ import requests
 import argparse
 import random
 import urllib
+import PIL as pil
 from pathlib import Path
-
-from PIL import Image
-from inky import Inky7Colour
 
 IMG_SIZES = (
     "square",
@@ -116,6 +114,11 @@ if __name__ == "__main__":
     parser.add_argument("--site", required=True)
     parser.add_argument("--size", required=False, choices=IMG_SIZES, default="medium")
     parser.add_argument("--loglevel", default="warning")
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Preview the image instead of showing it on the inky display",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=args.loglevel.upper())
@@ -125,8 +128,15 @@ if __name__ == "__main__":
 
     fname = download_url(random.choice(urls))
 
-    # Display the image on the inky 7 colour
-    img = Image.open(fname).resize((600, 448))
-    display = Inky7Colour()
-    display.set_image(img)
-    display.show()
+    img = pil.Image.open(fname)
+    padded = pil.ImageOps.pad(img, (600, 448))
+
+    if args.preview:
+        pil.ImageShow.show(padded)
+
+    else:
+        from inky import Inky7Colour
+
+        display = Inky7Colour()
+        display.set_image(padded)
+        display.show()
