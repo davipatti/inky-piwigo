@@ -119,14 +119,39 @@ if __name__ == "__main__":
         action="store_true",
         help="Preview the image instead of showing it on the inky display",
     )
+    parser.add_argument(
+        "--recent_filter",
+        help="Program must be run at least this many times before URL is shown again.",
+        default=25,
+        type=int,
+    )
     args = parser.parse_args()
+
+    if args.recent_filter < 0:
+        raise ValueError("--recent_filter must be positive")
 
     logging.basicConfig(level=args.loglevel.upper())
 
     session = PiwigoSession(args.username, args.password, args.site)
+
+    # all URLs that match the tag
     urls = session.tagUrls(args.tag_name, size=args.size)
 
-    fname = download_url(random.choice(urls))
+    # Check history of URLs that have been shown. Exclude any URLs that have been shown
+    # recently.
+    try:
+        recent_urls = Path("history.txt").read_text().split()[-args.recent_filter :]
+    except FileNotFoundError:
+        recent_urls = []
+    not_recent_urls = set(urls) - set(recent_urls)
+    candidate_urls = not_recent_urls if not_recent_urls else urls
+    url = random.choice(list(candidate_urls))
+
+    # Keep log of URLs that have been shown
+    with open("history.txt", "a") as fp:
+        fp.write(f"{url}\n")
+
+    fname = download_url(url)
 
     img = Image.open(fname)
     padded = ImageOps.pad(img, (600, 448))
