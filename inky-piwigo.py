@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     session = PiwigoSession(args.username, args.password, args.site)
 
-    if not session.loggedOn():
+    if not session.loggedOn:
         session.logOn()
 
     # all URLs that match the tag
