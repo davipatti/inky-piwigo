@@ -38,6 +38,21 @@ class PiwigoSession:
         self.username = username
         self.password = password
 
+    @property
+    def loggedOn(self) -> bool:
+        """
+        Is a user currently logged on?
+        """
+        logging.info(f"checking status for {self.username}")
+        resp = requests.post(
+            f"{self.site}/ws.php?format=json",
+            data={
+                "method": "pwg.session.getStatus",
+            },
+            cookies=self.cookies,
+        )
+        return resp.json()["result"]["username"] == self.username
+
     def logOn(self) -> None:
         """
         Logs on and saves session cookie to disk.
@@ -137,6 +152,9 @@ if __name__ == "__main__":
     logging.basicConfig(level=args.loglevel.upper())
 
     session = PiwigoSession(args.username, args.password, args.site)
+
+    if not session.loggedOn():
+        session.logOn()
 
     # all URLs that match the tag
     urls = session.tagUrls(args.tag_name, size=args.size)
