@@ -8,7 +8,6 @@ import pickle
 import requests
 import argparse
 import random
-import urllib
 from pathlib import Path
 from PIL import Image, ImageOps, ImageShow
 
@@ -94,23 +93,28 @@ class PiwigoSession:
         else:
             raise Exception("couldn't fetch image urls")
 
+    def download_url(self, url: str) -> str:
+        """
+        Downloads a URL. Returns the filename saved.
+        """
+        fname = url.split("/")[-1]
+        if not Path("img").exists():
+            os.mkdir("img")
+        path = Path("img").joinpath(fname)
+        if not path.exists():
+            resp = requests.get(url, cookies=self.cookies)
 
-def download_url(url: str) -> str:
-    """Downloads a URL and returns the filename saved"""
-    fname = url.split("/")[-1]
-    if not Path("img").exists():
-        os.mkdir("img")
-    path = Path("img").joinpath(fname)
-    if not path.exists():
-        urllib.request.urlretrieve(url, path)
-    return path
+            with open(path, "wb") as fobj:
+                fobj.write(resp.content)
+
+        return path
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--username", required=True)
     parser.add_argument("--password", required=True)
-    parser.add_argument("--tag_name", required=True)
+    parser.add_argument("--tag_name")
     parser.add_argument("--site", required=True)
     parser.add_argument("--size", required=False, choices=IMG_SIZES, default="medium")
     parser.add_argument("--loglevel", default="warning")
@@ -151,7 +155,7 @@ if __name__ == "__main__":
     with open("history.txt", "a") as fp:
         fp.write(f"{url}\n")
 
-    fname = download_url(url)
+    fname = session.download_url(url)
 
     img = Image.open(fname)
     padded = ImageOps.pad(img, (600, 448))
